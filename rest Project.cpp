@@ -98,9 +98,105 @@ class Employee {
 
 };
 
-class Order : public Employee {
+class Menu{
 	private:
 
+		string itemID;
+		string itemName;
+		string price;
+        string done;
+        ofstream myfile;
+
+		public:
+			void showMenu (){
+                  string line;
+                  ifstream myinputfile ("menu.bin");
+                  if (myinputfile.is_open())
+                  {
+                    cout << "Code\tName\tPrice (per serving)";
+                    while ( getline (myinputfile,line) )
+                    {
+                      cout << line << "\t";
+                      getline (myinputfile,line);
+                      cout << line << "\t";
+                      getline (myinputfile,line);
+                      cout << line << "\t";
+                      getline (myinputfile,line);
+                      cout << endl;
+                    }
+                    myinputfile.close();
+                  }
+
+                  else cout << "Unable to open file";
+			}
+
+			void addItem (string i, string n, string p){
+                sigh:
+                cout << "\nEnter product code: ";
+                cin >> itemID;
+                cout << "\nEnter product name: ";
+                cin >> itemName;
+                cout << "\n Enter product cost: ";
+                cin >> price;
+                cout << "\n\nAdd item to menu? (Y / N)  ";
+                cin >> done;
+
+                if(done == "N" || done == "n"){
+                        system("cls");
+                        goto sigh;
+                }
+                else{
+
+                    myfile.open ("menu.bin", ios::out | ios::app | ios::binary);
+
+                  if (myfile.is_open())
+                  {
+                    myfile << itemID;
+                    myfile << "\n";
+                    myfile << itemName;
+                    myfile << "\n";
+                    myfile << price;
+                    myfile << "\n";
+                    myfile.close();
+                  }
+                  else cout << "Could not add item to menu...Unable to open file";
+                }
+			}
+
+			int getPrice (string code){
+                    int price;
+
+                  string line;
+                  ifstream myinputfile ("menu.bin");
+                  if (myinputfile.is_open())
+                  {
+
+                    while ( getline (myinputfile,line) )
+                    {
+                      if(line == code){
+                        getline (myinputfile,line);
+                        getline (myinputfile,line);
+                        price = atoi(line.c_str());
+                        return price;
+                      }
+                    }
+                    myinputfile.close();
+                  }
+
+                  else{
+                    cout << "Unable to fetch item price";
+                    return 666;
+                  }
+
+
+
+			}
+
+};
+
+class Order : public Employee {
+	private:
+        Menu here;
 		string order[50][24];
 		int bill;
 		bool done;
@@ -162,109 +258,22 @@ class Order : public Employee {
 			newSale.addSales(temp, oID, employeeID);
 
 		}
-		int getBill (string ID){
-			int sum=0;
+		int getBill (string oID){
+			int sum=0,j=0, k=3;
 
+            if(order[j][0] == oID)
+                {
+                    while(order[j][k] != "end")
+                    {
+                        sum = sum + here.getPrice(order[j][k]);
+                    }
+                }
 			return sum;
 		}
 
 };
 
-class Menu{
-	private:
 
-		string itemID;
-		string itemName;
-		string price;
-        string done;
-        ofstream myfile;
-
-		public:
-			void showMenu (){
-                  string line;
-                  ifstream myinputfile ("menu.bin");
-                  if (myinputfile.is_open())
-                  {
-                    cout << "Code\tName\tPrice (per serving)";
-                    while ( getline (myinputfile,line) )
-                    {
-                      cout << line << "\t";
-                      getline (myinputfile,line);
-                      cout << line << "\t";
-                      getline (myinputfile,line);
-                      cout << line << "\t";
-                      getline (myinputfile,line);
-                      cout << endl;
-                    }
-                    myinputfile.close();
-                  }
-
-                  else cout << "Unable to open file";
-			}
-
-			void addItem (string i, string n, string p){
-                sigh:
-                cout << "\nEnter product code: ";
-                cin >> itemID;
-                cout << "\nEnter product name: ";
-                cin >> itemName;
-                cout << "\n Enter product cost: ";
-                cin >> price;
-                cout << "\n\nAdd item to menu? (Y / N)  ";
-                cin >> done;
-
-                if(done == "N" || done == "n"){
-                        system("cls");
-                        goto sigh;
-                }
-                else{
-
-                    myfile.open ("menu.bin", ios::out | ios::app | ios::binary);
-
-                  if (myfile.is_open())
-                  {
-                    myfile << itemID;
-                    myfile << "\n"; // har entry ko seperate krne k lye
-                    myfile << itemName;
-                    myfile << "\n";
-                    myfile << price;
-                    myfile << "\n";
-                    myfile.close();
-                  }
-                  else cout << "Could not add item to menu...Unable to open file";
-                }
-			}
-
-			int getPrice (string code){
-                    int price;
-
-                  string line;
-                  ifstream myinputfile ("menu.bin");
-                  if (myinputfile.is_open())
-                  {
-
-                    while ( getline (myinputfile,line) )
-                    {
-                      if(line == code){
-                        getline (myinputfile,line);
-                        getline (myinputfile,line);
-                        price = atoi(line.c_str());
-                        return price;
-                      }
-                    }
-                    myinputfile.close();
-                  }
-
-                  else{
-                    cout << "Unable to fetch item price";
-                    return 666;
-                  }
-
-
-
-			}
-
-};
 
 class Reservation : public Employee{
 	private:
@@ -274,7 +283,6 @@ class Reservation : public Employee{
 		string name;
 		string timeStart;
 		string table_number;
-
 
 	public:
 
@@ -312,6 +320,7 @@ class Reservation : public Employee{
                 cout << "Reservation not possible.\t";
 		}
 
+
 		bool available (string D, string T, string TN){
             string line;
             ifstream myinputfile ("example.bin");
@@ -348,13 +357,14 @@ class Reservation : public Employee{
 
 class Owner : public Menu, public Sales{
 	private:
-		string ID= "Asad Tahir";
+		string ID= "AsadTahir";
 		string pasward = "asad1234";
 		string employeeID;
 		string name;
 		string contact;
 		string address;
 		string shift;
+		ofstream myfile;
 
 	public:
 		bool logIn(string a, string b){
@@ -364,17 +374,64 @@ class Owner : public Menu, public Sales{
 			}else
 				return false;
 		}
+
 		void addEmployee(){
 			cout << "Enter Employee ID : ";cin>>employeeID;
 			cout << "\nEnter Employee Name : ";cin>>name;
 			cout << "\nEnter Employee Contact : ";cin>>contact;
 			cout << "\nEnter Employee Address : ";cin>>address;
 			cout << "\nEnter Employee Shift : ";cin>>shift;
-			// write All to database
+			myfile.open ("employeeRecord.bin", ios::out | ios::app | ios::binary);
+
+            if (myfile.is_open()){
+
+                myfile << employeeID;
+                myfile << "\n";
+                myfile << name;
+                myfile << "\n";
+                myfile << contact;
+                myfile << "\n";
+                myfile << address;
+                myfile << "\n";
+                myfile << shift;
+                myfile << "\n";
+                myfile.close();
+           }
+           else cout << "Unable to open file";
 		}
+
 		void fireEployee(){
 			cout << " Enter Employee ID : ";cin>>employeeID;
-			// serch in database delet All record about employee
+
+            myfile.open ("temp.bin", ios::out | ios::app | ios::binary);
+            ifstream myinputfile ("employeeRecord.bin");
+            string line;
+            if (myinputfile.is_open()){
+                while ( getline (myinputfile,line) )
+                {
+                  if(line != employeeID){
+                    for(int g=0; g<4;g++){
+                        myfile << line;
+                        myfile << "\n";
+                        getline (myinputfile,line);
+                    }
+                  }
+                    else{
+                        for(int g=0; g<4;g++){
+                            getline (myinputfile,line);
+                        }
+                    }
+                  }
+                myinputfile.close();
+                myfile.close();
+                std::remove("employeeRecord.bin");
+                std::rename("temp.bin", "employeeRecord.bin");
+              }
+
+            else
+                cout << "Unable to open file";
+
+
 
 		}
 
@@ -413,11 +470,19 @@ int main(){
                 make.makeReservation();
         case 5:
             {
-                string pasw;
-                cout << "Enter ID : ";cin >> order;
-                cout << "Enter password : ";cin >> pasw;
-                if(login.logIn(order , pasw))
+                string pasw,eyeD;
+                cout << "Enter ID : ";
+                cin >> eyeD;
+                cout << "Enter password : ";
+                cin >> pasw;
+
+                if(login.logIn(eyeD , pasw) == true)
                 {
+                    system("cls");
+                    cout << "\t\t====================================\n";
+                    cout << "\t\t  Restaurant Management System v1.0\n";
+                    cout << "\t\t====================================\n";
+
                     cout << "Enter 1 to Add Employee : "<<endl;
                     cout << "Enter 2 to remove Employee : "<<endl;
                     cout << "Enter 3 to view Sales : "<<endl;
@@ -447,10 +512,12 @@ int main(){
                 else
                 {
                     cout << "Wrong Credentials!"<<endl;
+                    system("pause");
                 }
                 break;
 		    }
-
+        case 6:
+                return 0;
         default:
                 cout<< "\a";
         }
